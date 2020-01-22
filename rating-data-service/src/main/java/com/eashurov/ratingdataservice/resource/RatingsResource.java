@@ -15,7 +15,7 @@ import com.eashurov.ratingdataservice.models.UserRating;
 public class RatingsResource {
 	
 	
-	@RequestMapping("/{movieId}")
+	@RequestMapping("/movies/{movieId}")
 	public Rating getRating(@PathVariable("movieId") String movieId) {
 		
 		return new Rating(movieId, 4);
@@ -27,15 +27,15 @@ public class RatingsResource {
 	@RequestMapping("users/{userId}")
 	public UserRating getUserRating(@PathVariable("userId") String userId) {
 		
-		
-		List<Rating> ratings = Arrays.asList(
-				new Rating("NewMovie", 3),
-				new Rating("SecondMovie", 4),
-				new Rating("ThirdMovie", 4)
-				);
+//		
+//		List<Rating> ratings = Arrays.asList(
+//				new Rating("NewMovie", 3),
+//				new Rating("SecondMovie", 4),
+//				new Rating("ThirdMovie", 4)
+//				);
 		
 		UserRating userRating = new UserRating();
-		userRating.setUserRating(ratings);
+		userRating.initData(userId);
 		return userRating;
 		
 		
