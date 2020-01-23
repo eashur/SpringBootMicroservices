@@ -15,24 +15,34 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 import com.eashurov.moviecatalogservice.models.CatalogItem;
 import com.eashurov.moviecatalogservice.models.Movie;
+import com.eashurov.moviecatalogservice.models.Rating;
 import com.eashurov.moviecatalogservice.models.UserRating;
+import com.eashurov.moviecatalogservice.services.MovieInfo;
+import com.eashurov.moviecatalogservice.services.UserRatingInfo;
 
 @RestController
 @RequestMapping ("/catalog")
 public class MovieCatalogResources {
 	
 	@Autowired
-	private RestTemplate restTemplate;
+	WebClient.Builder webClientbuilder;
 	
 	@Autowired
-	WebClient.Builder webClientbuilder;
-
+	MovieInfo movieInfo;
+	
+	@Autowired
+	UserRatingInfo userRatingInfo;
+	
 	
 	
 	
 	@RequestMapping("/{userId}")
-	@HystrixCommand
 	public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
+		
+		UserRating userRating = userRatingInfo.getUserRating(userId);
+		return userRating.getRatings().stream()
+				.map(rating -> movieInfo.getCatalogItem(rating))
+				.collect(Collectors.toList());
 		
 		
 //		List<Rating> ratings = Arrays.asList(
@@ -40,35 +50,22 @@ public class MovieCatalogResources {
 //				new Rating("SecondMovie", 4),
 //				new Rating("ThirdMovie", 4)
 //				);
-//		
-		
-		UserRating userRating = restTemplate.getForObject("http://ratings-data-service/ratingsdata/users/"+userId, UserRating.class);
-		return userRating.getRatings().stream().map(rating ->{
-			
-			Movie movie = restTemplate.getForObject("http://movie-info-service/movies/"+rating.getMovieId(), Movie.class);
-			
+//				
 //		Movie movie = webClientbuilder.build()
 //			.get()
 //			.uri("http://localhost:8082/movies/"+rating.getMovieId())
 //			.retrieve()
 //			.bodyToMono(Movie.class)
 //			.block();
-//			
-			
-			
-			return new CatalogItem(movie.getName(), "Test", rating.getRating());
-			
-		}).collect(Collectors.toList());
-			
-		
-		
-		
 	
 	}
-	public List<CatalogItem> getFallbackCatalog(@PathVariable("userId") String userId){
-		System.out.println("************************* In Fallback method");
-		return Arrays.asList(new CatalogItem("No movie", "", 0));
-	}
+	
+	
+	
+//	public List<CatalogItem> getFallbackCatalog(@PathVariable("userId") String userId){
+//		System.out.println("************************* In Fallback method");
+//		return Arrays.asList(new CatalogItem("No movie", "", 0));
+//	}
 		
 	
 }
